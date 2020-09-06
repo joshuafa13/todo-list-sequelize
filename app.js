@@ -79,6 +79,18 @@ app.get('/users/logout', (req, res) => {
   res.send('logout')
 })
 
+app.get('/todos/new', (req, res) => {
+  res.render('new')
+})
+
+app.post('/todos', (req, res) => {
+  const name = req.body.name
+
+  return Todo.create({ name })
+    .then(() => res.redirect('/'))
+    .catch(error => console.log(error))
+})
+
 app.get('/todos/:id', (req, res) => {
   const id = req.params.id
   console.log(id)
@@ -87,7 +99,38 @@ app.get('/todos/:id', (req, res) => {
     .catch(error => console.log(error))
 })
 
+app.get('/todos/:id/edit', (req, res) => {
+  const id = req.params.id
+  return Todo.findOne({ where: { id } })
+    .then(todo => res.render('edit', { todo: todo.get() }))
+    .catch(error => console.log(error))
+})
 
+app.put('/todos/:id', (req, res) => {
+  const id = req.params.id
+  const { name, isDone } = req.body
+
+  return Todo.findOne({ where: { id } })
+    .then(todo => {
+      todo.name = name
+      todo.isDone = isDone === 'on'
+      return todo.save()
+    })
+    .then(() => res.redirect(`/todos/${id}`))
+    .catch(error => console.log(error))
+})
+
+app.delete('/todos/:id', (req, res) => {
+  const id = req.params.id
+
+  return Todo.findOne({ where: { id } })
+    .then(todo => {
+      console.log(todo.toJSON())
+      todo.destroy()
+    })
+    .then(() => res.redirect('/'))
+    .catch(error => console.log(error))
+})
 
 app.listen(PORT, () => {
   console.log(`App is running on http://localhost:${PORT}`)
