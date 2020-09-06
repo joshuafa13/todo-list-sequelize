@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs')
 const session = require('express-session')
 const usePassport = require('./config/passport')
 const passport = require('passport')
+const routes = require('./routes')
 
 app = express()
 const PORT = 3000
@@ -22,20 +23,23 @@ app.use(session({
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(methodOverride('_method'))
 
+app.use(routes)
+
 const db = require('./models')
 const Todo = db.Todo
 const User = db.User
 
 usePassport(app)
 
-app.get('/', (req, res) => {
-  return Todo.findAll({
-    raw: true,
-    nest: true
-  })
-    .then(todos => { return res.render('index', { todos: todos }) })
-    .catch(error => { return res.status(422).json(error) })
-})
+
+// app.get('/', (req, res) => {
+//   return Todo.findAll({
+//     raw: true,
+//     nest: true
+//   })
+//     .then(todos => { return res.render('index', { todos: todos }) })
+//     .catch(error => { return res.status(422).json(error) })
+// })
 
 app.get('/users/login', (req, res) => {
   res.render('login')
